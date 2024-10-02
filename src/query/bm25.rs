@@ -6,7 +6,7 @@ use crate::schema::Field;
 use crate::{Score, Searcher, Term};
 
 const K1: Score = 1.2;
-const B: Score = 0.0;
+const B: Score = 0.3;
 
 /// An interface to compute the statistics needed in BM25 scoring.
 ///
