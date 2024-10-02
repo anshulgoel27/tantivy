@@ -5,8 +5,8 @@ use crate::query::Explanation;
 use crate::schema::Field;
 use crate::{Score, Searcher, Term};
 
-const K1: Score = 2.0;
-const B: Score = 0.0;
+const K1: Score = 1.2;
+const B: Score = 0.01;
 
 /// An interface to compute the statistics needed in BM25 scoring.
 ///
