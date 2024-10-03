@@ -6,7 +6,7 @@ use crate::schema::Field;
 use crate::{Score, Searcher, Term};
 
 const K1: Score = 1.2;
-const B: Score = 0.75;
+const B: Score = 0.25;
 
 /// An interface to compute the statistics needed in BM25 scoring.
 ///
@@ -26,26 +26,29 @@ pub trait Bm25StatisticsProvider {
 
 impl Bm25StatisticsProvider for Searcher {
     fn total_num_tokens(&self, field: Field) -> crate::Result<u64> {
-        let mut total_num_tokens = 0u64;
+        // let mut total_num_tokens = 0u64;
 
-        for segment_reader in self.segment_readers() {
-            let inverted_index = segment_reader.inverted_index(field)?;
-            total_num_tokens += inverted_index.total_num_tokens();
-        }
-        Ok(total_num_tokens)
+        // for segment_reader in self.segment_readers() {
+        //     let inverted_index = segment_reader.inverted_index(field)?;
+        //     total_num_tokens += inverted_index.total_num_tokens();
+        // }
+        // Ok(total_num_tokens)
+        Ok(1)
     }
 
     fn total_num_docs(&self) -> crate::Result<u64> {
-        let mut total_num_docs = 0u64;
+        // let mut total_num_docs = 0u64;
 
-        for segment_reader in self.segment_readers() {
-            total_num_docs += u64::from(segment_reader.max_doc());
-        }
-        Ok(total_num_docs)
+        // for segment_reader in self.segment_readers() {
+        //     total_num_docs += u64::from(segment_reader.max_doc());
+        // }
+        // Ok(total_num_docs)
+        Ok(1)
     }
 
     fn doc_freq(&self, term: &Term) -> crate::Result<u64> {
-        self.doc_freq(term)
+        //self.doc_freq(term)
+        Ok(1)
     }
 }
 
