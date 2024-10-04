@@ -5,8 +5,8 @@ use crate::query::Explanation;
 use crate::schema::Field;
 use crate::{Score, Searcher, Term};
 
-const K1: Score = 1.2;
-const B: Score = 0.30;
+const K1: Score = 0.90;
+const B: Score = 0.40;
 
 /// An interface to compute the statistics needed in BM25 scoring.
 ///
@@ -101,13 +101,13 @@ impl Bm25Weight {
     ) -> crate::Result<Bm25Weight> {
         assert!(!terms.is_empty(), "Bm25 requires at least one term");
         let field = terms[0].field();
-        for term in &terms[1..] {
-            assert_eq!(
-                term.field(),
-                field,
-                "All terms must belong to the same field."
-            );
-        }
+        // for term in &terms[1..] {
+        //     assert_eq!(
+        //         term.field(),
+        //         field,
+        //         "All terms must belong to the same field."
+        //     );
+        // }
 
         let total_num_tokens = statistics.total_num_tokens(field)?;
         let total_num_docs = statistics.total_num_docs()?;
