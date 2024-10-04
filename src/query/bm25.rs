@@ -5,8 +5,8 @@ use crate::query::Explanation;
 use crate::schema::Field;
 use crate::{Score, Searcher, Term};
 
-const K1: Score = 0.90;
-const B: Score = 0.40;
+const K1: Score = 1.2;
+const B: Score = 0.75;
 
 /// An interface to compute the statistics needed in BM25 scoring.
 ///
@@ -44,15 +44,17 @@ impl Bm25StatisticsProvider for Searcher {
         Ok(total_num_docs)
     }
 
-    fn doc_freq(&self, term: &Term) -> crate::Result<u64> {
-        self.doc_freq(term)
+    fn doc_freq(&self, _term: &Term) -> crate::Result<u64> {
+        //self.doc_freq(term)
+        Ok(1)
     }
 }
 
-pub(crate) fn idf(doc_freq: u64, doc_count: u64) -> Score {
-    assert!(doc_count >= doc_freq, "{doc_count} >= {doc_freq}");
-    let x = ((doc_count - doc_freq) as Score + 0.5) / (doc_freq as Score + 0.5);
-    (1.0 + x).ln()
+pub(crate) fn idf(_doc_freq: u64, _doc_count: u64) -> Score {
+    // assert!(doc_count >= doc_freq, "{doc_count} >= {doc_freq}");
+    // let x = ((doc_count - doc_freq) as Score + 0.5) / (doc_freq as Score + 0.5);
+    // (1.0 + x).ln()
+    1.0
 }
 
 fn cached_tf_component(fieldnorm: u32, average_fieldnorm: Score) -> Score {
