@@ -44,17 +44,15 @@ impl Bm25StatisticsProvider for Searcher {
         Ok(total_num_docs)
     }
 
-    fn doc_freq(&self, _term: &Term) -> crate::Result<u64> {
-        //self.doc_freq(term)
-        Ok(1)
+    fn doc_freq(&self, term: &Term) -> crate::Result<u64> {
+        self.doc_freq(term)
     }
 }
 
-pub(crate) fn idf(_doc_freq: u64, _doc_count: u64) -> Score {
-    // assert!(doc_count >= doc_freq, "{doc_count} >= {doc_freq}");
-    // let x = ((doc_count - doc_freq) as Score + 0.5) / (doc_freq as Score + 0.5);
-    // (1.0 + x).ln()
-    1.0
+pub(crate) fn idf(doc_freq: u64, doc_count: u64) -> Score {
+    assert!(doc_count >= doc_freq, "{doc_count} >= {doc_freq}");
+    let x = ((doc_count - doc_freq) as Score + 0.5) / (doc_freq as Score + 0.5);
+    (1.0 + x).ln()
 }
 
 fn cached_tf_component(fieldnorm: u32, average_fieldnorm: Score) -> Score {
