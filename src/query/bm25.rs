@@ -45,7 +45,8 @@ impl Bm25StatisticsProvider for Searcher {
     }
 
     fn doc_freq(&self, term: &Term) -> crate::Result<u64> {
-        self.doc_freq(term)
+        //self.doc_freq(term)
+        Ok(1)
     }
 }
 
