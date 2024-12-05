@@ -261,6 +261,8 @@ pub struct FuzzyTermQuery {
     /// max expansions allowed
     max_expansions: Option<u32>,
     prefix_length: Option<usize>,
+    /// score based on edit distance
+    fuzzy_scoring: bool
 }
 
 impl FuzzyTermQuery {
@@ -273,6 +275,7 @@ impl FuzzyTermQuery {
             prefix: false,
             max_expansions: Some(DEFAULT_MAX_EXPANSIONS),
             prefix_length: None,
+            fuzzy_scoring: true
         }
     }
 
@@ -285,12 +288,18 @@ impl FuzzyTermQuery {
             prefix: true,
             max_expansions: Some(DEFAULT_MAX_EXPANSIONS),
             prefix_length: None,
+            fuzzy_scoring: true
         }
     }
 
     /// maximum expansions to allow for fuzzy match
     pub fn set_max_expansions(&mut self, max_expansions: Option<u32>) {
         self.max_expansions = max_expansions;
+    }
+
+    /// enable/disable fuzzy scoring
+    pub fn set_fuzzy_scoring(&mut self, fuzzy_scoring: bool) {
+        self.fuzzy_scoring = fuzzy_scoring;
     }
 
     /// prefix length to allow for fuzzy match
@@ -355,12 +364,14 @@ impl FuzzyTermQuery {
                 DfaWrapper(automaton),
                 json_path_bytes,
                 self.max_expansions,
+                self.fuzzy_scoring
             ))
         } else {
             Ok(AutomatonWeight::new(
                 self.term.field(),
                 DfaWrapper(automaton),
                 self.max_expansions,
+                self.fuzzy_scoring
             ))
         }
     }
@@ -443,6 +454,7 @@ impl FuzzyTermQuery {
                 },
                 json_path_bytes,
                 self.max_expansions,
+                self.fuzzy_scoring
             ))
         } else {
             Ok(AutomatonWeight::new(
@@ -452,6 +464,7 @@ impl FuzzyTermQuery {
                     automaton_b: prefix_automaton,
                 },
                 self.max_expansions,
+                self.fuzzy_scoring
             ))
         }
     }
