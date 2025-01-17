@@ -149,7 +149,7 @@ where
         let inverted_index = reader.inverted_index(self.field)?;
         let term_dict = inverted_index.terms();
         let mut term_stream = self.automaton_stream(term_dict)?;
-
+        let max_doc = reader.max_doc();
         if self.fuzzy_scoring {
             let mut scorers = vec![];
             if let Some(max_expansion) = self.max_expansions {
@@ -174,10 +174,9 @@ where
                 }
             }
 
-            let scorer = super::BufferedUnionScorer::build(scorers, SumCombiner::default);
+            let scorer = super::BufferedUnionScorer::build(scorers, SumCombiner::default, max_doc);
             Ok(Box::new(scorer))
         } else {
-            let max_doc = reader.max_doc();
             let mut doc_bitset = BitSet::with_max_value(max_doc);
             if let Some(max_expansion) = self.max_expansions {
                 let mut counter: u32 = 0;
