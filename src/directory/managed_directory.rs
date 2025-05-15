@@ -323,6 +323,10 @@ impl Directory for ManagedDirectory {
         self.directory.sync_directory()?;
         Ok(())
     }
+    
+    fn complete_path(&self, relative_path: &Path) -> PathBuf {
+        self.directory.complete_path(relative_path)
+    }
 }
 
 impl Clone for ManagedDirectory {

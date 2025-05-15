@@ -519,6 +519,10 @@ impl Directory for MmapDirectory {
         fd.sync_data()?;
         Ok(())
     }
+    
+    fn complete_path(&self, relative_path: &Path) -> PathBuf {
+        self.resolve_path(relative_path)
+    }
 }
 
 #[cfg(test)]

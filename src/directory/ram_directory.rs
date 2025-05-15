@@ -237,6 +237,10 @@ impl Directory for RamDirectory {
     fn sync_directory(&self) -> io::Result<()> {
         Ok(())
     }
+    
+    fn complete_path(&self, _relative_path: &Path) -> PathBuf {
+        PathBuf::new()
+    }
 }
 
 #[cfg(test)]

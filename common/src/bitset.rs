@@ -1,6 +1,7 @@
-use std::io::Write;
+use std::io::{Read, Write};
 use std::{fmt, io};
 
+use byteorder::ReadBytesExt;
 use ownedbytes::OwnedBytes;
 
 use crate::ByteCount;
@@ -197,6 +198,31 @@ impl BitSet {
         Ok(())
     }
 
+    pub fn deserialize(data: &[u8]) -> io::Result<BitSet> {
+        let mut cursor = io::Cursor::new(data);
+
+        // Step 1: Read max_value (first 4 bytes)
+        let max_value = cursor.read_u32::<byteorder::LittleEndian>()?;
+        let num_tinysets = num_buckets(max_value);
+
+        // Step 2: Read each TinySet (8 bytes each)
+        let mut tinysets = Vec::with_capacity(num_tinysets as usize);
+        for _ in 0..num_tinysets {
+            let mut buf = [0u8; 8];
+            cursor.read_exact(&mut buf)?;
+            tinysets.push(TinySet::deserialize(buf));
+        }
+
+        // Step 3: Count how many total bits are set
+        let len = tinysets.iter().map(|ts| ts.len() as u64).sum();
+
+        Ok(BitSet {
+            tinysets: tinysets.into_boxed_slice(),
+            len,
+            max_value,
+        })
+    }
+    
     /// Create a new `BitSet` that may contain elements
     /// within `[0, max_val)`.
     pub fn with_max_value(max_value: u32) -> BitSet {
