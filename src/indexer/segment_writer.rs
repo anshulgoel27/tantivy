@@ -913,7 +913,7 @@ mod tests {
 
     #[test]
     fn test_json_term_with_numeric_merge_panic_regression_bug_2283() {
-        // https://github.com/quickwit-oss/tantivy/issues/2283
+        // https://github.com/anshulgoel27/tantivy/issues/2283
         let mut schema_builder = Schema::builder();
         let json = schema_builder.add_json_field("json", TEXT);
         let schema = schema_builder.build();

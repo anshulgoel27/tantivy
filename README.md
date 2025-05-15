@@ -1,5 +1,5 @@
 [![Docs](https://docs.rs/tantivy/badge.svg)](https://docs.rs/crate/tantivy/)
-[![Build Status](https://github.com/quickwit-oss/tantivy/actions/workflows/test.yml/badge.svg)](https://github.com/quickwit-oss/tantivy/actions/workflows/test.yml)
+[![Build Status](https://github.com/anshulgoel27/tantivy/actions/workflows/test.yml/badge.svg)](https://github.com/anshulgoel27/tantivy/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/quickwit-oss/tantivy/branch/main/graph/badge.svg)](https://codecov.io/gh/quickwit-oss/tantivy)
 [![Join the chat at https://discord.gg/MT27AG5EVE](https://shields.io/discord/908281611840282624?label=chat%20on%20discord)](https://discord.gg/MT27AG5EVE)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -62,7 +62,7 @@ Distributed search is out of the scope of Tantivy, but if you are looking for th
 Tantivy works on stable Rust and supports Linux, macOS, and Windows.
 
 - [Tantivy's simple search example](https://tantivy-search.github.io/examples/basic_search.html)
-- [tantivy-cli and its tutorial](https://github.com/quickwit-oss/tantivy-cli) - `tantivy-cli` is an actual command-line interface that makes it easy for you to create a search engine,
+- [tantivy-cli and its tutorial](https://github.com/anshulgoel27/tantivy-cli) - `tantivy-cli` is an actual command-line interface that makes it easy for you to create a search engine,
 index documents, and search via the CLI or a small server with a REST API.
 It walks you through getting a Wikipedia search engine up and running in a few minutes.
 - [Reference doc for the last released version](https://docs.rs/tantivy/)
@@ -93,7 +93,7 @@ Tantivy compiles on stable Rust.
 To check out and run tests, you can simply run:
 
 ```bash
-git clone https://github.com/quickwit-oss/tantivy.git
+git clone https://github.com/anshulgoel27/tantivy.git
 cd tantivy
 cargo test
 ```
@@ -115,7 +115,7 @@ cargo test
 
 ### Can I use Tantivy in other languages?
 
-- Python → [tantivy-py](https://github.com/quickwit-oss/tantivy-py)
+- Python → [tantivy-py](https://github.com/anshulgoel27/tantivy-py)
 - Ruby → [tantiny](https://github.com/baygeldin/tantiny)
 
 You can also find other bindings on [GitHub](https://github.com/search?q=tantivy) but they may be less maintained.

@@ -446,7 +446,7 @@ impl IndexMerger {
                         } else {
                             // The positions_buffer may contain positions from the previous term
                             // Existence of positions depend on the value type in JSON fields.
-                            // https://github.com/quickwit-oss/tantivy/issues/2283
+                            // https://github.com/anshulgoel27/tantivy/issues/2283
                             positions_buffer.clear();
                             0u32
                         };
@@ -503,7 +503,7 @@ impl IndexMerger {
                     // the doc stores would be on average half full, given total randomness (which
                     // is not the case here, but not sure how it behaves exactly).
                     //
-                    // https://github.com/quickwit-oss/tantivy/issues/1053
+                    // https://github.com/anshulgoel27/tantivy/issues/1053
                     //
                     // take 7 in order to not walk over all checkpoints.
                     || store_reader.block_checkpoints().take(7).count() < 6

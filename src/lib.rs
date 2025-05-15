@@ -102,7 +102,7 @@
 //! A good place for you to get started is to check out
 //! the example code (
 //! [literate programming](https://tantivy-search.github.io/examples/basic_search.html) /
-//! [source code](https://github.com/quickwit-oss/tantivy/blob/main/examples/basic_search.rs))
+//! [source code](https://github.com/anshulgoel27/tantivy/blob/main/examples/basic_search.rs))
 //!
 //! # Tantivy Architecture Overview
 //!

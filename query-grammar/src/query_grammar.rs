@@ -1018,7 +1018,7 @@ pub fn parse_to_ast_lenient(query_str: &str) -> (UserInputAst, Vec<LenientError>
 
 /// Removes unnecessary children clauses in AST
 ///
-/// Motivated by [issue #1433](https://github.com/quickwit-oss/tantivy/issues/1433)
+/// Motivated by [issue #1433](https://github.com/anshulgoel27/tantivy/issues/1433)
 fn rewrite_ast(mut input: UserInputAst) -> UserInputAst {
     if let UserInputAst::Clause(terms) = &mut input {
         for term in terms {

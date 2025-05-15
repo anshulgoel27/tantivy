@@ -88,7 +88,7 @@
 //! ```
 //! # Code Organization
 //!
-//! Check the [README](https://github.com/quickwit-oss/tantivy/tree/main/src/aggregation#readme) on github to see how the code is organized.
+//! Check the [README](https://github.com/anshulgoel27/tantivy/tree/main/src/aggregation#readme) on github to see how the code is organized.
 //!
 //! # Nested Aggregation
 //!

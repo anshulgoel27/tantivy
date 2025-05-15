@@ -3,7 +3,7 @@
 //! for each new tantivy version.
 //!
 //! To add support for a tokenizer, implement the [`Tokenizer`] trait.
-//! Checkout the [tantivy repo](https://github.com/quickwit-oss/tantivy/tree/main/src/tokenizer) for some examples.
+//! Checkout the [tantivy repo](https://github.com/anshulgoel27/tantivy/tree/main/src/tokenizer) for some examples.
 
 use std::borrow::{Borrow, BorrowMut};
 use std::ops::{Deref, DerefMut};
