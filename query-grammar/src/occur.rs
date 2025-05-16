@@ -17,6 +17,8 @@ pub enum Occur {
     /// Document that contain the query are excluded from the
     /// search.
     MustNot,
+    /// Like Must except that these clauses do not participate in scoring
+    Filter,
 }
 
 impl Occur {
@@ -29,6 +31,7 @@ impl Occur {
             Occur::Should => '?',
             Occur::Must => '+',
             Occur::MustNot => '-',
+            Occur::Filter => '#',
         }
     }
 
@@ -40,6 +43,8 @@ impl Occur {
             (Occur::Must, _) => Occur::Must,
             (Occur::MustNot, Occur::MustNot) => Occur::Must,
             (Occur::MustNot, _) => Occur::MustNot,
+            (Occur::Filter, Occur::Should) => Occur::MustNot,
+            (Occur::Filter, _) => Occur::Filter,
         }
     }
 }

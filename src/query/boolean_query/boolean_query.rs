@@ -185,7 +185,7 @@ impl BooleanQuery {
         for (occur, _) in &subqueries {
             match occur {
                 Occur::Should => minimum_required = 1,
-                Occur::Must | Occur::MustNot => {
+                Occur::Must | Occur::MustNot | Occur::Filter => {
                     minimum_required = 0;
                     break;
                 }

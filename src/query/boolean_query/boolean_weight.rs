@@ -160,7 +160,8 @@ impl<TScoreCombiner: ScoreCombiner> BooleanWeight<TScoreCombiner> {
             // Must be fitted.
             Required(Box<dyn Scorer>),
         }
-        let mut must_scorers = per_occur_scorers.remove(&Occur::Must);
+        let mut must_scorers: Option<Vec<Box<dyn Scorer + 'static>>> =
+            per_occur_scorers.remove(&Occur::Must);
         let should_opt = if let Some(mut should_scorers) = per_occur_scorers.remove(&Occur::Should)
         {
             let num_of_should_scorers = should_scorers.len();
@@ -199,6 +200,23 @@ impl<TScoreCombiner: ScoreCombiner> BooleanWeight<TScoreCombiner> {
                 CombinationMethod::Ignored
             }
         };
+        let filter_scorer = per_occur_scorers
+            .remove(&Occur::Filter)
+            .map(|scorers| scorer_union(scorers, DoNothingCombiner::default))
+            .map(|specialized_scorer: SpecializedScorer| {
+                into_box_scorer(specialized_scorer, DoNothingCombiner::default)
+            });
+
+        if let Some(filter_scorer) = filter_scorer {
+            must_scorers = match must_scorers.take() {
+                Some(mut must_scorers) => {
+                    must_scorers.push(filter_scorer);
+                    Some(must_scorers)
+                }
+                None => Some(vec![filter_scorer]),
+            };
+        }
+
         let exclude_scorer_opt: Option<Box<dyn Scorer>> = per_occur_scorers
             .remove(&Occur::MustNot)
             .map(|scorers| scorer_union(scorers, DoNothingCombiner::default))
@@ -362,7 +380,7 @@ impl<TScoreCombiner: ScoreCombiner + Sync> Weight for BooleanWeight<TScoreCombin
 
 fn is_positive_occur(occur: Occur) -> bool {
     match occur {
-        Occur::Must | Occur::Should => true,
+        Occur::Must | Occur::Should | Occur::Filter => true,
         Occur::MustNot => false,
     }
 }

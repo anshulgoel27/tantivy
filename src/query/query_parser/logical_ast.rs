@@ -72,6 +72,7 @@ fn occur_letter(occur: Occur) -> &'static str {
         Occur::Must => "+",
         Occur::MustNot => "-",
         Occur::Should => "",
+        Occur::Filter => "#",
     }
 }
 
