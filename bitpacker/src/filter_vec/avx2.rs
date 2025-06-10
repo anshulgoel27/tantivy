@@ -17,10 +17,10 @@ fn u32_to_i32(val: u32) -> i32 {
 }
 
 #[inline]
-unsafe fn u32_to_i32_avx2(vals_u32x8s: DataType) -> DataType {
+unsafe fn u32_to_i32_avx2(vals_u32x8s: DataType) -> DataType { unsafe {
     const HIGHEST_BIT_MASK: DataType = from_u32x8([HIGHEST_BIT; NUM_LANES]);
     op_xor(vals_u32x8s, HIGHEST_BIT_MASK)
-}
+}}
 
 pub fn filter_vec_in_place(range: RangeInclusive<u32>, offset: u32, output: &mut Vec<u32>) {
     // We use a monotonic mapping from u32 to i32 to make the comparison possible in AVX2.
@@ -51,7 +51,7 @@ unsafe fn filter_vec_avx2_aux(
     output: *mut u32,
     offset: u32,
     num_words: usize,
-) -> usize {
+) -> usize { unsafe {
     let mut output_tail = output;
     let range_simd = set1(*range.start())..=set1(*range.end());
     let mut ids = from_u32x8([
@@ -77,24 +77,24 @@ unsafe fn filter_vec_avx2_aux(
         input = input.offset(1);
     }
     output_tail.offset_from(output) as usize
-}
+}}
 
 #[inline]
 #[target_feature(enable = "avx2")]
-unsafe fn compact(data: DataType, mask: u8) -> DataType {
+unsafe fn compact(data: DataType, mask: u8) -> DataType { unsafe {
     let vperm_mask = MASK_TO_PERMUTATION[mask as usize];
     _mm256_permutevar8x32_epi32(data, vperm_mask)
-}
+}}
 
 #[inline]
 #[target_feature(enable = "avx2")]
-unsafe fn compute_filter_bitset(val: __m256i, range: std::ops::RangeInclusive<__m256i>) -> u8 {
+unsafe fn compute_filter_bitset(val: __m256i, range: std::ops::RangeInclusive<__m256i>) -> u8 { unsafe {
     let too_low = op_greater(*range.start(), val);
     let too_high = op_greater(val, *range.end());
     let inside = op_or(too_low, too_high);
     255 - std::arch::x86_64::_mm256_movemask_ps(std::mem::transmute::<DataType, __m256>(inside))
         as u8
-}
+}}
 
 union U8x32 {
     vector: DataType,
