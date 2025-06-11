@@ -42,10 +42,6 @@ impl TermFilterQuery {
             let error_msg = format!("Field {:?} is not indexed.", field_entry.name());
             return Err(crate::TantivyError::SchemaError(error_msg));
         }
-        if !field_entry.is_fast() {
-            let error_msg = format!("Field {:?} is not fast.", field_entry.name());
-            return Err(crate::TantivyError::SchemaError(error_msg));
-        }
         let bm25_weight = Bm25Weight::new(Explanation::new("<no score>", 1.0f32), 1.0f32);
         let index_record_option = IndexRecordOption::Basic;
 
