@@ -224,10 +224,10 @@ impl InvertedIndexReader {
     /// If you know which terms to pre-load, prefer using [`Self::warm_postings`] or
     /// [`Self::warm_postings`] instead.
     #[cfg(not(feature = "quickwit"))]
-    pub fn warm_postings_full(&self, with_positions: bool) -> io::Result<()> {
-        self.postings_file_slice.read_bytes()?;
+    pub async fn warm_postings_full(&self, with_positions: bool) -> io::Result<()> {
+        self.postings_file_slice.read_bytes_async().await?;
         if with_positions {
-            self.positions_file_slice.read_bytes()?;
+            self.positions_file_slice.read_bytes_async().await?;
         }
         Ok(())
     }
