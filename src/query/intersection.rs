@@ -144,6 +144,9 @@ impl<TDocSet: DocSet, TOtherDocSet: DocSet> DocSet for Intersection<TDocSet, TOt
                 return candidate;
             }
             candidate = left.advance();
+            if candidate == TERMINATED {
+                return TERMINATED;
+            }
         }
     }
 
