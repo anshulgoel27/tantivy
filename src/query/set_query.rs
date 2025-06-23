@@ -85,6 +85,12 @@ impl Query for TermSetQuery {
 /// DFA Wrapper type
 pub struct SetDfaWrapper(Map<Vec<u8>>);
 
+impl SetDfaWrapper {
+    pub fn new(map: Map<Vec<u8>>) -> Self {
+        SetDfaWrapper(map)
+    }
+}
+
 impl Automaton for SetDfaWrapper {
     type State = Option<CompiledAddr>;
 
