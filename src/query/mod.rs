@@ -59,12 +59,13 @@ pub use self::query_parser::{QueryParser, QueryParserError};
 pub use self::range_query::*;
 pub use self::regex_query::RegexQuery;
 pub use self::reqopt_scorer::RequiredOptionalScorer;
-pub use self::score_combiner::{DisjunctionMaxCombiner, ScoreCombiner, SumCombiner};
+pub use self::score_combiner::{DisjunctionMaxCombiner, ScoreCombiner, SumCombiner, DoNothingCombiner};
 pub use self::scorer::Scorer;
 pub use self::set_query::TermSetQuery;
 pub use self::term_query::TermQuery;
 pub use self::term_query::TermFilterQuery;
 pub use self::union::BufferedUnionScorer;
+pub use self::set_query::SetDfaWrapper;
 #[cfg(test)]
 pub use self::vec_docset::VecDocSet;
 pub use self::weight::Weight;

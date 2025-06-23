@@ -82,6 +82,7 @@ impl Query for TermSetQuery {
     }
 }
 
+/// DFA Wrapper type
 pub struct SetDfaWrapper(Map<Vec<u8>>);
 
 impl Automaton for SetDfaWrapper {
