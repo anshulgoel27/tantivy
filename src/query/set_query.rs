@@ -82,7 +82,7 @@ impl Query for TermSetQuery {
     }
 }
 
-struct SetDfaWrapper(Map<Vec<u8>>);
+pub struct SetDfaWrapper(Map<Vec<u8>>);
 
 impl Automaton for SetDfaWrapper {
     type State = Option<CompiledAddr>;
