@@ -86,6 +86,7 @@ impl Query for TermSetQuery {
 pub struct SetDfaWrapper(Map<Vec<u8>>);
 
 impl SetDfaWrapper {
+    /// CTOR
     pub fn new(map: Map<Vec<u8>>) -> Self {
         SetDfaWrapper(map)
     }
