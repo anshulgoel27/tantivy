@@ -169,7 +169,6 @@ impl<T: PartialOrd + Clone> TopSegmentCollector<T> {
     pub fn harvest(self) -> Vec<(T, DocAddress)> {
         let segment_ord = self.segment_ord;
         self.topn_computer
-            .into_sorted_vec()
             .into_iter()
             .map(|comparable_doc| {
                 (
