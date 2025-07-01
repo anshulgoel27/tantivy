@@ -92,6 +92,7 @@ impl<TDocSet: DocSet> DocSet for SimpleUnion<TDocSet> {
     }
 
     fn size_hint(&self) -> u32 {
+        // TODO: use estimate_union
         self.docsets
             .iter()
             .map(|docset| docset.size_hint())
@@ -99,6 +100,10 @@ impl<TDocSet: DocSet> DocSet for SimpleUnion<TDocSet> {
             .unwrap_or(0u32)
     }
 
+    fn cost(&self) -> u64 {
+        self.docsets.iter().map(|docset| docset.cost()).sum()
+    }
+    
     fn count_including_deleted(&mut self) -> u32 {
         if self.doc == TERMINATED {
             return 0u32;

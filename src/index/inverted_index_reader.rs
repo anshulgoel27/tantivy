@@ -218,16 +218,31 @@ impl InvertedIndexReader {
             .unwrap_or(0u32))
     }
 
+    fn warmup_bytes(bytes: &[u8]) {
+        let page_size = page_size::get();
+        for i in (0..bytes.len()).step_by(page_size) {
+            unsafe {
+                std::ptr::read_volatile(&bytes[i]);
+            }
+        }
+    }
+
     /// Warmup the block postings for all terms.
     /// This method is for an advanced usage only.
     ///
     /// If you know which terms to pre-load, prefer using [`Self::warm_postings`] or
     /// [`Self::warm_postings`] instead.
     #[cfg(not(feature = "quickwit"))]
-    pub async fn warm_postings_full(&self, with_positions: bool) -> io::Result<()> {
-        self.postings_file_slice.read_bytes_async().await?;
+    pub async fn warm_postings_full(&self, with_positions: bool, with_ospage: bool) -> io::Result<()> {
+        let data = self.postings_file_slice.read_bytes_async().await?;
+        if with_ospage {
+            Self::warmup_bytes(&data);
+        }
         if with_positions {
-            self.positions_file_slice.read_bytes_async().await?;
+            let data = self.positions_file_slice.read_bytes_async().await?;
+            if with_ospage {
+                Self::warmup_bytes(&data);
+            }
         }
         Ok(())
     }
