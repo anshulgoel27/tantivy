@@ -173,9 +173,9 @@ impl<TScoreCombiner: ScoreCombiner> BooleanWeight<TScoreCombiner> {
                 return Ok(SpecializedScorer::Other(Box::new(EmptyScorer)));
             }
             match self.minimum_number_should_match {
-                0 => CombinationMethod::Optional(scorer_union(should_scorers, &score_combiner_fn)),
+                0 => CombinationMethod::Optional(scorer_union(should_scorers, &score_combiner_fn, num_docs)),
                 1 => {
-                    let scorer_union = scorer_union(should_scorers, &score_combiner_fn);
+                    let scorer_union = scorer_union(should_scorers, &score_combiner_fn, num_docs);
                     CombinationMethod::Required(scorer_union)
                 }
                 n if num_of_should_scorers == n => {
@@ -228,8 +228,8 @@ impl<TScoreCombiner: ScoreCombiner> BooleanWeight<TScoreCombiner> {
                 }
             }
             (CombinationMethod::Required(should_scorer), Some(mut must_scorers)) => {
-                must_scorers.push(into_box_scorer(should_scorer, &score_combiner_fn));
-                SpecializedScorer::Other(intersect_scorers(must_scorers))
+                must_scorers.push(into_box_scorer(should_scorer, &score_combiner_fn, num_docs));
+                SpecializedScorer::Other(intersect_scorers(must_scorers, num_docs))
             }
             (CombinationMethod::Ignored, None) => {
                 return Ok(SpecializedScorer::Other(Box::new(EmptyScorer)))
