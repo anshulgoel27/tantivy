@@ -1,3 +1,5 @@
+use std::cmp;
+
 use levenshtein_automata::{Distance, LevenshteinAutomatonBuilder, DFA};
 use once_cell::sync::OnceCell;
 use tantivy_fst::Automaton;
@@ -434,7 +436,7 @@ impl FuzzyTermQuery {
             })?
         };
 
-        let prefix_len = self.prefix_length.unwrap_or(0);
+        let prefix_len = cmp::min(self.prefix_length.unwrap_or(0), term_text.len());
 
         let automaton = if self.prefix {
             automaton_builder.build_prefix_dfa(&term_text)
