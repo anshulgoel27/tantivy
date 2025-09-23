@@ -172,5 +172,10 @@ name = "agg_bench"
 harness = false
 
 [[bench]]
-name = "range_query"
+name = "exists_json"
 harness = false
+
+[[bench]]
+name = "and_or_queries"
+harness = false
+

@@ -308,10 +308,9 @@ impl<TSSTable: SSTable> Dictionary<TSSTable> {
                 }
             }
             _ => {
-                return Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    format!("Unsupported sstable version, expected one of [2, 3], found {version}"),
-                ));
+                return Err(io::Error::other(format!(
+                    "Unsupported sstable version, expected one of [2, 3], found {version}"
+                )));
             }
         };
 
@@ -609,12 +608,12 @@ impl<TSSTable: SSTable> Dictionary<TSSTable> {
 
     /// Returns a range builder, to stream all of the terms
     /// within an interval.
-    pub fn range(&self) -> StreamerBuilder<TSSTable> {
+    pub fn range(&self) -> StreamerBuilder<'_, TSSTable> {
         StreamerBuilder::new(self, AlwaysMatch)
     }
 
     /// Returns a range builder filtered with a prefix.
-    pub fn prefix_range<K: AsRef<[u8]>>(&self, prefix: K) -> StreamerBuilder<TSSTable> {
+    pub fn prefix_range<K: AsRef<[u8]>>(&self, prefix: K) -> StreamerBuilder<'_, TSSTable> {
         let lower_bound = prefix.as_ref();
         let mut upper_bound = lower_bound.to_vec();
         for idx in (0..upper_bound.len()).rev() {
@@ -633,7 +632,7 @@ impl<TSSTable: SSTable> Dictionary<TSSTable> {
     }
 
     /// A stream of all the sorted terms.
-    pub fn stream(&self) -> io::Result<Streamer<TSSTable>> {
+    pub fn stream(&self) -> io::Result<Streamer<'_, TSSTable>> {
         self.range().into_stream()
     }
 
