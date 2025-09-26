@@ -145,7 +145,7 @@ impl<TScorer: Scorer, TScoreCombiner: ScoreCombiner> BufferedUnionScorer<TScorer
     }
 
     fn is_in_horizon(&self, target: DocId) -> bool {
-        if let Some(gap) = target.checked_sub(self.offset) {
+        if let Some(gap) = target.checked_sub(self.window_start_doc) {
             gap < HORIZON
         } else {
             false
@@ -180,9 +180,9 @@ where
             // Our value is within the buffered horizon.
 
             // Skipping to corresponding bucket.
-            let gap = target - self.offset;
-            let new_cursor = gap as usize / 64;
-            for obsolete_tinyset in &mut self.bitsets[self.cursor..new_cursor] {
+            let gap = target - self.window_start_doc;
+            let new_bucket_idx = gap as usize / 64;
+            for obsolete_tinyset in &mut self.bitsets[self.bucket_idx..new_bucket_idx] {
                 obsolete_tinyset.clear();
             }
             for score_combiner in &mut self.scores[self.bucket_idx * 64..new_bucket_idx * 64] {
