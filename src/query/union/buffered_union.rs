@@ -6,8 +6,10 @@ use crate::query::size_hint::estimate_union;
 use crate::query::Scorer;
 use crate::{DocId, Score};
 
-const HORIZON_NUM_TINYBITSETS: usize = 64;
-const HORIZON: u32 = 64u32 * HORIZON_NUM_TINYBITSETS as u32;
+// The buffered union looks ahead within a fixed-size sliding window
+// of upcoming document IDs (the "horizon").
+const HORIZON_NUM_TINYBITSETS: usize = HORIZON as usize / 64;
+const HORIZON: u32 = 64u32 * 64u32;
 
 // `drain_filter` is not stable yet.
 // This function is similar except that it does is not unstable, and
@@ -30,12 +32,26 @@ where
 
 /// Creates a `DocSet` that iterate through the union of two or more `DocSet`s.
 pub struct BufferedUnionScorer<TScorer, TScoreCombiner = DoNothingCombiner> {
+    /// Active scorers (already filtered of `TERMINATED`).
     docsets: Vec<TScorer>,
+    /// Sliding window presence map for upcoming docs.
+    ///
+    /// There are `HORIZON_NUM_TINYBITSETS` buckets, each covering
+    /// a span of 64 doc IDs. Bucket `i` represents the range
+    /// `[window_start_doc + i*64, window_start_doc + (i+1)*64)`.
     bitsets: Box<[TinySet; HORIZON_NUM_TINYBITSETS]>,
+    // Index of the current TinySet bucket within the sliding window.
+    bucket_idx: usize,
+    /// Per-doc score combiners for the current window.
+    ///
+    /// these accumulators merge contributions from all scorers that
+    /// hit the same doc within the buffered window.
     scores: Box<[TScoreCombiner; HORIZON as usize]>,
-    cursor: usize,
-    offset: DocId,
+    /// Start doc ID (inclusive) of the current sliding window.
+    window_start_doc: DocId,
+    /// Current doc ID of the union.
     doc: DocId,
+    /// Combined score for current `doc` as produced by `TScoreCombiner`.
     score: Score,
     num_docs: u32,
 }
@@ -79,8 +95,8 @@ impl<TScorer: Scorer, TScoreCombiner: ScoreCombiner> BufferedUnionScorer<TScorer
             docsets: non_empty_docsets,
             bitsets: Box::new([TinySet::empty(); HORIZON_NUM_TINYBITSETS]),
             scores: Box::new([score_combiner_fn(); HORIZON as usize]),
-            cursor: HORIZON_NUM_TINYBITSETS,
-            offset: 0,
+            bucket_idx: HORIZON_NUM_TINYBITSETS,
+            window_start_doc: 0,
             doc: 0,
             score: 0.0,
             num_docs,
@@ -95,8 +111,10 @@ impl<TScorer: Scorer, TScoreCombiner: ScoreCombiner> BufferedUnionScorer<TScorer
 
     fn refill(&mut self) -> bool {
         if let Some(min_doc) = self.docsets.iter().map(DocSet::doc).min() {
-            self.offset = min_doc;
-            self.cursor = 0;
+            // Reset the sliding window to start at the smallest doc
+            // across all scorers and prebuffer within the horizon.
+            self.window_start_doc = min_doc;
+            self.bucket_idx = 0;
             self.doc = min_doc;
             refill(
                 &mut self.docsets,
@@ -111,16 +129,16 @@ impl<TScorer: Scorer, TScoreCombiner: ScoreCombiner> BufferedUnionScorer<TScorer
     }
 
     fn advance_buffered(&mut self) -> bool {
-        while self.cursor < HORIZON_NUM_TINYBITSETS {
-            if let Some(val) = self.bitsets[self.cursor].pop_lowest() {
-                let delta = val + (self.cursor as u32) * 64;
-                self.doc = self.offset + delta;
+        while self.bucket_idx < HORIZON_NUM_TINYBITSETS {
+            if let Some(val) = self.bitsets[self.bucket_idx].pop_lowest() {
+                let delta = val + (self.bucket_idx as u32) * 64;
+                self.doc = self.window_start_doc + delta;
                 let score_combiner = &mut self.scores[delta as usize];
                 self.score = score_combiner.score();
                 score_combiner.clear();
                 return true;
             } else {
-                self.cursor += 1;
+                self.bucket_idx += 1;
             }
         }
         false
@@ -167,10 +185,10 @@ where
             for obsolete_tinyset in &mut self.bitsets[self.cursor..new_cursor] {
                 obsolete_tinyset.clear();
             }
-            for score_combiner in &mut self.scores[self.cursor * 64..new_cursor * 64] {
+            for score_combiner in &mut self.scores[self.bucket_idx * 64..new_bucket_idx * 64] {
                 score_combiner.clear();
             }
-            self.cursor = new_cursor;
+            self.bucket_idx = new_bucket_idx;
 
             // Advancing until we reach the end of the bucket
             // or we reach a doc greater or equal to the target.
@@ -246,7 +264,7 @@ where
         if self.doc == TERMINATED {
             return 0;
         }
-        let mut count = self.bitsets[self.cursor..HORIZON_NUM_TINYBITSETS]
+        let mut count = self.bitsets[self.bucket_idx..HORIZON_NUM_TINYBITSETS]
             .iter()
             .map(|bitset| bitset.len())
             .sum::<u32>()
@@ -260,7 +278,7 @@ where
                 bitset.clear();
             }
         }
-        self.cursor = HORIZON_NUM_TINYBITSETS;
+        self.bucket_idx = HORIZON_NUM_TINYBITSETS;
         count
     }
 }
