@@ -26,8 +26,9 @@
 //! let _agg_req: Aggregations = serde_json::from_str(elasticsearch_compatible_json_req).unwrap();
 //! ```
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 use super::bucket::{
@@ -43,7 +44,7 @@ use super::metric::{
 /// defined names. It is also used in buckets aggregations to define sub-aggregations.
 ///
 /// The key is the user defined name of the aggregation.
-pub type Aggregations = HashMap<String, Aggregation>;
+pub type Aggregations = FxHashMap<String, Aggregation>;
 
 /// Aggregation request.
 ///
@@ -208,13 +209,6 @@ impl AggregationVariants {
             _ => None,
         }
     }
-    pub(crate) fn as_top_hits(&self) -> Option<&TopHitsAggregationReq> {
-        match &self {
-            AggregationVariants::TopHits(top_hits) => Some(top_hits),
-            _ => None,
-        }
-    }
-
     pub(crate) fn as_percentile(&self) -> Option<&PercentilesAggregationReq> {
         match &self {
             AggregationVariants::Percentiles(percentile_req) => Some(percentile_req),

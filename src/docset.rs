@@ -123,15 +123,6 @@ pub trait DocSet: Send {
     /// which would be the number of documents in the DocSet.
     ///
     /// By default this returns `size_hint()`.
-    ///
-    /// DocSets may have vastly different cost depending on their type,
-    /// e.g. an intersection with 10 hits is much cheaper than
-    /// a phrase search with 10 hits, since it needs to load positions.
-    ///
-    /// ### Future Work
-    /// We may want to differentiate `DocSet` costs more more granular, e.g.
-    /// creation_cost, advance_cost, seek_cost on to get a good estimation
-    /// what query types to choose.
     fn cost(&self) -> u64 {
         self.size_hint() as u64
     }

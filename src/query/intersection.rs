@@ -1,5 +1,6 @@
 use super::size_hint::estimate_intersection;
 use crate::docset::{DocSet, TERMINATED};
+use crate::query::size_hint::estimate_intersection;
 use crate::query::term_query::TermScorer;
 use crate::query::{EmptyScorer, Scorer};
 use crate::{DocId, Score};
@@ -79,7 +80,7 @@ impl<TDocSet: DocSet> Intersection<TDocSet, TDocSet> {
     pub(crate) fn new(mut docsets: Vec<TDocSet>, num_docs: u32) -> Intersection<TDocSet, TDocSet> {
         let num_docsets = docsets.len();
         assert!(num_docsets >= 2);
-        docsets.sort_by_key(|docset| docset.size_hint());
+        docsets.sort_by_key(|docset| docset.cost());
         go_to_first_doc(&mut docsets);
         let left = docsets.remove(0);
         let right = docsets.remove(0);
