@@ -70,8 +70,8 @@ hyperloglogplus = { version = "0.4.1", features = ["const-loop"] }
 futures-util = { version = "0.3.28", optional = true }
 futures-channel = { version = "0.3.28", optional = true }
 fnv = "1.0.7"
-tokio = { version = "1.40.0", features = ["full"] }
-anyhow = "1.0.86"
+typetag = "0.2.21"
+
 [target.'cfg(windows)'.dependencies]
 winapi = "0.3.9"
 
@@ -89,7 +89,7 @@ more-asserts = "0.3.1"
 rand_distr = "0.4.3"
 time = { version = "0.3.10", features = ["serde-well-known", "macros"] }
 postcard = { version = "1.0.4", features = [
-  "use-std",
+    "use-std",
 ], default-features = false }
 tokio = { version = "1.40.0", features = ["full"] }
 anyhow = "1.0.86"
@@ -178,4 +178,3 @@ harness = false
 [[bench]]
 name = "and_or_queries"
 harness = false
-

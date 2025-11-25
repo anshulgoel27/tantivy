@@ -80,7 +80,6 @@ async fn main() -> anyhow::Result<()> {
     index_writer.add_document(doc!(
         title => "Telp",
     ))?;
-    index_writer.commit()?;
 
     // ### Committing
     //
