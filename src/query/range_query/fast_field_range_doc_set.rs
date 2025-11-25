@@ -134,9 +134,7 @@ impl<T: Send + Sync + PartialOrd + Copy + Debug + 'static> RangeDocSet<T> {
 
     pub fn fetch_doc_id_first_value(&self, doc_id: DocId) -> Option<T> {
         if doc_id != TERMINATED {
-            let mut block: Vec<Option<T>> = vec![None; 1];
-            self.column.first_vals(&vec![doc_id], block.as_mut_slice());
-            return *block.first().unwrap_or(&None);
+            return self.column.first(0);
         }
         None
     }
