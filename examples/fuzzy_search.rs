@@ -17,8 +17,7 @@ use tantivy::schema::*;
 use tantivy::{doc, Index, IndexWriter, ReloadPolicy};
 use tempfile::TempDir;
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> tantivy::Result<()> {
     // Let's create a temporary directory for the
     // sake of this example
     let index_path = TempDir::new()?;
@@ -75,10 +74,16 @@ async fn main() -> anyhow::Result<()> {
     // ### Adding documents
     //
     index_writer.add_document(doc!(
-        title => "Help",
+        title => "The Name of the Wind",
     ))?;
     index_writer.add_document(doc!(
-        title => "Telp",
+        title => "The Diary of Muadib",
+    ))?;
+    index_writer.add_document(doc!(
+        title => "A Dairy Cow",
+    ))?;
+    index_writer.add_document(doc!(
+        title => "The Diary of a Young Girl",
     ))?;
 
     // ### Committing
@@ -134,21 +139,20 @@ async fn main() -> anyhow::Result<()> {
     // and release it right after your query is finished.
     let searcher = reader.searcher();
 
-    let start = std::time::Instant::now();
     // ### FuzzyTermQuery
     {
-        let term = Term::from_field_text(title, "help");
-        let mut query = FuzzyTermQuery::new(term, 3, true);
-        query.set_prefix_length(Some(2));
-        query.set_fuzzy_scoring(true);
+        let term = Term::from_field_text(title, "Diary");
+        let query = FuzzyTermQuery::new(term, 2, true);
 
-        let (top_docs, _count) = searcher
-            .search(&query, &(TopDocs::with_limit(5), Count))
+        let (top_docs, count) = searcher
+            .search(&query, &(TopDocs::with_limit(5).order_by_score(), Count))
             .unwrap();
+        assert_eq!(count, 3);
+        assert_eq!(top_docs.len(), 3);
         for (score, doc_address) in top_docs {
             // Note that the score is not lower for the fuzzy hit.
             // There's an issue open for that: https://github.com/quickwit-oss/tantivy/issues/563
-            let retrieved_doc: TantivyDocument = searcher.doc_async(doc_address).await?;
+            let retrieved_doc: TantivyDocument = searcher.doc(doc_address)?;
             println!("score {score:?} doc {}", retrieved_doc.to_json(&schema));
             // score 1.0 doc {"title":["The Diary of Muadib"]}
             //
@@ -157,8 +161,6 @@ async fn main() -> anyhow::Result<()> {
             // score 1.0 doc {"title":["A Dairy Cow"]}
         }
     }
-    let duration = start.elapsed();
-    println!("Function took: {:?}", duration);
 
     Ok(())
 }

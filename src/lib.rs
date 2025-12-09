@@ -85,7 +85,7 @@
 //! // Perform search.
 //! // `topdocs` contains the 10 most relevant doc ids, sorted by decreasing scores...
 //! let top_docs: Vec<(Score, DocAddress)> =
-//!     searcher.search(&query, &TopDocs::with_limit(10))?;
+//!     searcher.search(&query, &TopDocs::with_limit(10).order_by_score())?;
 //!
 //! for (_score, doc_address) in top_docs {
 //!     // Retrieve the actual content of documents given its `doc_address`.
@@ -125,7 +125,7 @@
 //!
 //! - **Searching**: [Searcher] searches the segments with anything that implements
 //!   [Query](query::Query) and merges the results. The list of [supported
-//!   queries](query::Query#implementors). Custom Queries are supported by implementing the
+//!   queries](query::Query#implementers). Custom Queries are supported by implementing the
 //!   [Query](query::Query) trait.
 //!
 //! - **[Directory](directory)**: Abstraction over the storage where the index data is stored.
