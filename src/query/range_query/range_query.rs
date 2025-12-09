@@ -723,7 +723,7 @@ mod tests {
         let make_scorer = move |lower_bound: Bound<u64>, upper_bound: Bound<u64>| {
             let lower_bound_term = lower_bound.map(make_term);
             let upper_bound_term = upper_bound.map(make_term);
-            let range_query = RangeQuery::new(lower_bound_term, upper_bound_term);
+            let range_query = RangeQuery::new(lower_bound_term, upper_bound_term, None, None, None);
             let range_weight = range_query
                 .weight(EnableScoring::disabled_from_schema(&schema))
                 .unwrap();

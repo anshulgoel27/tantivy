@@ -90,7 +90,7 @@ mod tests {
                 .parse_query(term)
                 .unwrap();
             let top_docs: Vec<(f32, DocAddress)> =
-                searcher.search(&query, &TopDocs::with_limit(10)).unwrap();
+                searcher.search(&query, &TopDocs::with_limit(10).order_by_score()).unwrap();
 
             top_docs.iter().map(|el| el.1.doc_id).collect::<Vec<_>>()
         };
@@ -129,7 +129,7 @@ mod tests {
                 .parse_query(term)
                 .unwrap();
             let top_docs: Vec<(f32, DocAddress)> =
-                searcher.search(&query, &TopDocs::with_limit(10)).unwrap();
+                searcher.search(&query, &TopDocs::with_limit(10).order_by_score()).unwrap();
 
             top_docs.iter().map(|el| el.1.doc_id).collect::<Vec<_>>()
         };
