@@ -467,12 +467,14 @@ impl<TScoreCombiner: ScoreCombiner + Sync> Weight for BooleanWeight<TScoreCombin
         reader: &SegmentReader,
         callback: &mut dyn FnMut(DocId, Score),
     ) -> crate::Result<()> {
-        let num_docs = reader.num_docs();
         let scorer = self.complex_scorer(reader, 1.0, &self.score_combiner_fn)?;
         match scorer {
             SpecializedScorer::TermUnion(term_scorers) => {
-                let mut union_scorer =
-                    BufferedUnionScorer::build(term_scorers, &self.score_combiner_fn, num_docs);
+                let mut union_scorer = BufferedUnionScorer::build(
+                    term_scorers,
+                    &self.score_combiner_fn,
+                    reader.num_docs(),
+                );
                 for_each_scorer(&mut union_scorer, callback);
             }
             SpecializedScorer::Other(mut scorer) => {
@@ -487,14 +489,16 @@ impl<TScoreCombiner: ScoreCombiner + Sync> Weight for BooleanWeight<TScoreCombin
         reader: &SegmentReader,
         callback: &mut dyn FnMut(&[DocId]),
     ) -> crate::Result<()> {
-        let num_docs = reader.num_docs();
         let scorer = self.complex_scorer(reader, 1.0, || DoNothingCombiner)?;
         let mut buffer = [0u32; COLLECT_BLOCK_BUFFER_LEN];
 
         match scorer {
             SpecializedScorer::TermUnion(term_scorers) => {
-                let mut union_scorer =
-                    BufferedUnionScorer::build(term_scorers, &self.score_combiner_fn, num_docs);
+                let mut union_scorer = BufferedUnionScorer::build(
+                    term_scorers,
+                    &self.score_combiner_fn,
+                    reader.num_docs(),
+                );
                 for_each_docset_buffered(&mut union_scorer, &mut buffer, callback);
             }
             SpecializedScorer::Other(mut scorer) => {

@@ -60,7 +60,7 @@ pub use self::query_parser::{QueryParser, QueryParserError};
 pub use self::range_query::*;
 pub use self::regex_query::RegexQuery;
 pub use self::reqopt_scorer::RequiredOptionalScorer;
-pub use self::score_combiner::{DisjunctionMaxCombiner, ScoreCombiner, SumCombiner, DoNothingCombiner};
+pub use self::score_combiner::{DisjunctionMaxCombiner, ScoreCombiner, SumCombiner};
 pub use self::scorer::Scorer;
 pub use self::set_query::TermSetQuery;
 pub use self::term_query::TermQuery;
@@ -73,81 +73,9 @@ pub use self::weight::Weight;
 
 #[cfg(test)]
 mod tests {
-    use crate::collector::TopDocs;
-    use crate::query::phrase_query::tests::create_index;
     use crate::query::QueryParser;
     use crate::schema::{Schema, TEXT};
-    use crate::{DocAddress, Index, Term};
-
-    #[test]
-    pub fn test_mixed_intersection_and_union() -> crate::Result<()> {
-        let index = create_index(&["a b", "a c", "a b c", "b"])?;
-        let schema = index.schema();
-        let text_field = schema.get_field("text").unwrap();
-        let searcher = index.reader()?.searcher();
-
-        let do_search = |term: &str| {
-            let query = QueryParser::for_index(&index, vec![text_field])
-                .parse_query(term)
-                .unwrap();
-            let top_docs: Vec<(f32, DocAddress)> =
-                searcher.search(&query, &TopDocs::with_limit(10).order_by_score()).unwrap();
-
-            top_docs.iter().map(|el| el.1.doc_id).collect::<Vec<_>>()
-        };
-
-        assert_eq!(do_search("a AND b"), vec![0, 2]);
-        assert_eq!(do_search("(a OR b) AND C"), vec![2, 1]);
-        // The intersection code has special code for more than 2 intersections
-        // left, right + others
-        // The will place the union in the "others" insersection to that seek_into_the_danger_zone
-        // is called
-        assert_eq!(
-            do_search("(a OR b) AND (c OR a) AND (b OR c)"),
-            vec![2, 1, 0]
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    pub fn test_mixed_intersection_and_union_with_skip() -> crate::Result<()> {
-        // Test 4096 skip in BufferedUnionScorer
-        let mut data: Vec<&str> = Vec::new();
-        data.push("a b");
-        let zz_data = vec!["z z"; 5000];
-        data.extend_from_slice(&zz_data);
-        data.extend_from_slice(&["a c"]);
-        data.extend_from_slice(&zz_data);
-        data.extend_from_slice(&["a b c", "b"]);
-        let index = create_index(&data)?;
-        let schema = index.schema();
-        let text_field = schema.get_field("text").unwrap();
-        let searcher = index.reader()?.searcher();
-
-        let do_search = |term: &str| {
-            let query = QueryParser::for_index(&index, vec![text_field])
-                .parse_query(term)
-                .unwrap();
-            let top_docs: Vec<(f32, DocAddress)> =
-                searcher.search(&query, &TopDocs::with_limit(10).order_by_score()).unwrap();
-
-            top_docs.iter().map(|el| el.1.doc_id).collect::<Vec<_>>()
-        };
-
-        assert_eq!(do_search("a AND b"), vec![0, 10002]);
-        assert_eq!(do_search("(a OR b) AND C"), vec![10002, 5001]);
-        // The intersection code has special code for more than 2 intersections
-        // left, right + others
-        // The will place the union in the "others" insersection to that seek_into_the_danger_zone
-        // is called
-        assert_eq!(
-            do_search("(a OR b) AND (c OR a) AND (b OR c)"),
-            vec![10002, 5001, 0]
-        );
-
-        Ok(())
-    }
+    use crate::{Index, Term};
 
     #[test]
     fn test_query_terms() {

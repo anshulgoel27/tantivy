@@ -15,11 +15,9 @@ const HORIZON: u32 = 64u32 * 64u32;
 // This function is similar except that it does is not unstable, and
 // it does not keep the original vector ordering.
 //
-// Elements are dropped and not yielded.
+// Also, it does not "yield" any elements.
 fn unordered_drain_filter<T, P>(v: &mut Vec<T>, mut predicate: P)
-where
-    P: FnMut(&mut T) -> bool,
-{
+where P: FnMut(&mut T) -> bool {
     let mut i = 0;
     while i < v.len() {
         if predicate(&mut v[i]) {
@@ -53,6 +51,7 @@ pub struct BufferedUnionScorer<TScorer, TScoreCombiner = DoNothingCombiner> {
     doc: DocId,
     /// Combined score for current `doc` as produced by `TScoreCombiner`.
     score: Score,
+    /// Number of documents in the segment.
     num_docs: u32,
 }
 
@@ -144,14 +143,6 @@ impl<TScorer: Scorer, TScoreCombiner: ScoreCombiner> BufferedUnionScorer<TScorer
         }
         false
     }
-
-    fn is_in_horizon(&self, target: DocId) -> bool {
-        if let Some(gap) = target.checked_sub(self.window_start_doc) {
-            gap < HORIZON
-        } else {
-            false
-        }
-    }
 }
 
 impl<TScorer, TScoreCombiner> DocSet for BufferedUnionScorer<TScorer, TScoreCombiner>
@@ -177,11 +168,11 @@ where
         if self.doc >= target {
             return self.doc;
         }
-        if self.is_in_horizon(target) {
+        let gap = target - self.window_start_doc;
+        if gap < HORIZON {
             // Our value is within the buffered horizon.
 
             // Skipping to corresponding bucket.
-            let gap = target - self.window_start_doc;
             let new_bucket_idx = gap as usize / 64;
             for obsolete_tinyset in &mut self.bitsets[self.bucket_idx..new_bucket_idx] {
                 obsolete_tinyset.clear();
@@ -226,27 +217,7 @@ where
         }
     }
 
-    fn seek_into_the_danger_zone(&mut self, target: DocId) -> bool {
-        if self.is_in_horizon(target) {
-            // Our value is within the buffered horizon and the docset may already have been
-            // processed and removed, so we need to use seek, which uses the regular advance.
-            self.seek(target) == target
-        } else {
-            // The docsets are not in the buffered range, so we can use seek_into_the_danger_zone
-            // of the underlying docsets
-            let is_hit = self
-                .docsets
-                .iter_mut()
-                .any(|docset| docset.seek_into_the_danger_zone(target));
-
-            // The API requires the DocSet to be in a valid state when `seek_into_the_danger_zone`
-            // returns true.
-            if is_hit {
-                self.seek(target);
-            }
-            is_hit
-        }
-    }
+    // TODO Also implement `count` with deletes efficiently.
 
     fn doc(&self) -> DocId {
         self.doc
@@ -257,10 +228,9 @@ where
     }
 
     fn cost(&self) -> u64 {
-        self.docsets.iter().map(DocSet::cost).sum()
+        self.docsets.iter().map(|docset| docset.cost()).sum()
     }
 
-    // TODO Also implement `count` with deletes efficiently.
     fn count_including_deleted(&mut self) -> u32 {
         if self.doc == TERMINATED {
             return 0;
