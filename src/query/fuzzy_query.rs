@@ -603,7 +603,8 @@ mod test {
         // passes because Levenshtein distance is 1 (substitute 'o' with 'a')
         {
             let term = Term::from_field_text(country_field, "japon");
-            let fuzzy_query = FuzzyTermQuery::new(term, 1, true);
+            let mut fuzzy_query = FuzzyTermQuery::new(term, 1, true);
+            fuzzy_query.set_fuzzy_scoring(true);
             let top_docs =
                 searcher.search(&fuzzy_query, &TopDocs::with_limit(2).order_by_score())?;
             assert_eq!(top_docs.len(), 1, "Expected only 1 document");
@@ -615,7 +616,8 @@ mod test {
         {
             let term = Term::from_field_text(country_field, "jap");
 
-            let fuzzy_query = FuzzyTermQuery::new(term, 1, true);
+            let mut fuzzy_query = FuzzyTermQuery::new(term, 1, true);
+            fuzzy_query.set_fuzzy_scoring(true);
             let top_docs =
                 searcher.search(&fuzzy_query, &TopDocs::with_limit(2).order_by_score())?;
             assert_eq!(top_docs.len(), 0, "Expected no document");
@@ -624,12 +626,13 @@ mod test {
         // passes because prefix Levenshtein distance is 0
         {
             let term = Term::from_field_text(country_field, "jap");
-            let fuzzy_query = FuzzyTermQuery::new_prefix(term, 1, true);
+            let mut fuzzy_query = FuzzyTermQuery::new_prefix(term, 1, true);
+            fuzzy_query.set_fuzzy_scoring(true);
             let top_docs =
                 searcher.search(&fuzzy_query, &TopDocs::with_limit(2).order_by_score())?;
             assert_eq!(top_docs.len(), 1, "Expected only 1 document");
             let (score, _) = top_docs[0];
-            assert_nearly_equals!(0.5, score);
+            assert_nearly_equals!(1.0, score);
         }
         Ok(())
     }
