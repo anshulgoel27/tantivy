@@ -684,7 +684,7 @@ mod tests {
 #[cfg(test)]
 mod proptest_boolean_query {
     use std::collections::{BTreeMap, HashSet};
-    use std::ops::Bound;
+    use std::ops::{Bound, Range};
 
     use proptest::collection::vec;
     use proptest::prelude::*;
@@ -762,10 +762,10 @@ mod proptest_boolean_query {
         }
     }
 
-    fn doc_ids(num_docs: usize, num_fields: usize) -> impl Iterator<Item = DocId> {
+    fn doc_ids(num_docs: usize, num_fields: usize) -> Range<DocId> {
         let permutations = 1 << num_fields;
         let copies = (num_docs as f32 / permutations as f32).ceil() as u32;
-        (0..(permutations * copies)).into_iter()
+        0..(permutations * copies)
     }
 
     fn create_index_with_boolean_permutations(
@@ -824,7 +824,6 @@ mod proptest_boolean_query {
     fn proptest_boolean_query() {
         // In the presence of optimizations around buffering, it can take large numbers of
         // documents to uncover some issues.
-        let num_docs = 10000;
         let num_fields = 8;
         let num_docs = 1 << num_fields;
         let (index, fields, range_field) =
