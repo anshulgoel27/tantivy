@@ -370,6 +370,9 @@ mod tests {
         let query = RangeQuery::new(
             Bound::Included(Term::from_field_u64(value_field, 100)),
             Bound::Included(Term::from_field_u64(value_field, 200)),
+            None,
+            None,
+            None
         );
 
         let count = searcher.search(&query, &Count).unwrap();
@@ -379,6 +382,9 @@ mod tests {
         let query2 = RangeQuery::new(
             Bound::Included(Term::from_field_u64(value_field, 0)),
             Bound::Included(Term::from_field_u64(value_field, 5)),
+            None,
+            None,
+            None
         );
 
         let count2 = searcher.search(&query2, &Count).unwrap();
