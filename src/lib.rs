@@ -17,6 +17,7 @@
 //!
 //! ```rust
 //! # use std::path::Path;
+//! # use std::fs;
 //! # use tempfile::TempDir;
 //! # use tantivy::collector::TopDocs;
 //! # use tantivy::query::QueryParser;
@@ -27,8 +28,11 @@
 //! #     // Let's create a temporary directory for the
 //! #     // sake of this example
 //! #     if let Ok(dir) = TempDir::new() {
-//! #         run_example(dir.path()).unwrap();
-//! #         dir.close().unwrap();
+//! #         let index_path = dir.path().join("index");
+//! #         // In case the directory already exists, we remove it
+//! #         let _ = fs::remove_dir_all(&index_path);
+//! #         fs::create_dir_all(&index_path).unwrap();
+//! #         run_example(&index_path).unwrap();
 //! #     }
 //! # }
 //! #
@@ -203,6 +207,7 @@ mod docset;
 mod reader;
 
 #[cfg(test)]
+#[cfg(feature = "mmap")]
 mod compat_tests;
 
 pub use self::reader::{IndexReader, IndexReaderBuilder, ReloadPolicy, Warmer};
@@ -1170,12 +1175,11 @@ pub mod tests {
 
     #[test]
     fn test_validate_checksum() -> crate::Result<()> {
-        let index_path = tempfile::tempdir().expect("dir");
         let mut builder = Schema::builder();
         let body = builder.add_text_field("body", TEXT | STORED);
         let schema = builder.build();
-        let index = Index::create_in_dir(&index_path, schema)?;
-        let mut writer: IndexWriter = index.writer(50_000_000)?;
+        let index = Index::create_in_ram(schema);
+        let mut writer: IndexWriter = index.writer_for_tests()?;
         writer.set_merge_policy(Box::new(NoMergePolicy));
         for _ in 0..5000 {
             writer.add_document(doc!(body => "foo"))?;
